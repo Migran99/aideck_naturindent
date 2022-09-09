@@ -1,0 +1,6 @@
+__pycache__
+deep-person-reid
+models/**
+pallet_videos/**
+pallet_signatures/**
+.ipynb_checkpoints
