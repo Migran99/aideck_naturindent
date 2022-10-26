@@ -4,6 +4,7 @@ import torch
 from torchreid.utils import FeatureExtractor
 import utils
 import argparse
+from copy import copy
 
 
 def main():
@@ -99,6 +100,9 @@ def main():
                     pallet_block_idx=pallet_block_idx+1
             cv2.imshow("Frame", resized)
         elif(len(pallet)==3):
+            pallets = copy(pallet)
+            for id,i in enumerate(pallets):
+                cv2.imwrite('pallet_signatures/'+ save_name + str(id) + ".png",i)
             print("pallet complete")
             # here signatur-creation from pallet[2]=pb1 pallet[1]=pb2 pallet[0]=pb3
             pallet_vectors = utils.create_vector(extractor, pallet)

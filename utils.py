@@ -56,7 +56,7 @@ def save_pallet_to_db(pallet):
         np.save(f, pallet[1])
         np.save(f, pallet[2])
 
-def compare_pallets(pallet1, pallet2): # euclidean or cosine
+def compare_pallets(pallet1, pallet2,file): # euclidean or cosine
     dist_pb1 = round(spatial.distance.cdist(pallet1[0], pallet2[0], 'euclidean')[0][0],6)
     dist_pb2 = round(spatial.distance.cdist(pallet1[1], pallet2[1], 'euclidean')[0][0],6)
     dist_pb3 = round(spatial.distance.cdist(pallet1[2], pallet2[2], 'euclidean')[0][0],6)
@@ -68,21 +68,24 @@ def compare_pallets(pallet1, pallet2): # euclidean or cosine
     print(str(round(dist_pb1, 4)) + "/" + str(dist_pb1_weight) + " " + str(round(dist_pb2,4)) + "/" + str(dist_pb2_weight) + " " + str(round(dist_pb3,4)) + "/" + str(dist_pb3_weight))
     print(weighted_mean)
     print("--------------------------")
+    file.write("\n"+str(round(dist_pb1, 4)) + "/" + str(dist_pb1_weight) + " " + str(round(dist_pb2,4)) + "/" + str(dist_pb2_weight) + " " + str(round(dist_pb3,4)) + "/" + str(dist_pb3_weight))
+    file.write("\n"+str(weighted_mean))
     return round(weighted_mean, 5)
 
-def find_pallet_from_db(pallet):
+def find_pallet_from_db(pallet, file):
     min_dist=2.0
     pallet_id='empty'
     for filename in os.listdir('pallet_signatures'):
         if filename.endswith('.npy'): 
             path = os.path.join('pallet_signatures', filename)
             print(path)
+            file.write("\n"+str(path))
             pallet_vector = []
             with open(path, 'rb') as f:
                 pallet_vector.append(np.load(f))
                 pallet_vector.append(np.load(f))
                 pallet_vector.append(np.load(f))
-            current_dist = compare_pallets(pallet, pallet_vector)
+            current_dist = compare_pallets(pallet, pallet_vector,file)
             if min_dist > current_dist:
                 min_dist = current_dist
                 pallet_id = filename.replace('.npy', "")

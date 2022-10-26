@@ -13,9 +13,11 @@ def main():
     parser = argparse.ArgumentParser(description='find signature')
     parser.add_argument('-v', '--video', required=False, help='video name in folder pallet_videos')
     #parser.add_argument('-w','--webcam', required=False,default=False)
+    parser.add_argument('-n', '--name', required=False, default='video' ,help='signature name')
     parser.add_argument('-r', '--resize', required=False, default=1.0, type=float ,help='reseize factor')
     parser.add_argument('-t', '--threshold', required=False, default=0.5, type=float ,help='confidence threshold')
     args = parser.parse_args()
+    
 
     backbone = 'pcb_p4'
     model_path = "models/model.pth.tar".format(backbone)
@@ -37,6 +39,8 @@ def main():
         print("Video [{}] selected!".format(args.video))
         cap = cv2.VideoCapture('pallet_videos/' + args.video + '.avi')
         save_name = args.video
+
+    save_name = args.name
 
     conf_th = args.threshold
     nms_th = 0.3
@@ -102,6 +106,9 @@ def main():
                     pallet_block_idx=pallet_block_idx+1
             cv2.imshow("Frame", resized)
         elif(len(pallet)==3):
+            for id,i in enumerate(pallet):
+                cv2.imwrite('tests/'+ save_name + "-" + str(id) + ".png",i)
+            file1 = open('tests/'+ save_name + ".txt", "a")  # write mode
             print("Pallet complete")
             # here signatur-creation from pallet[2]=pb1 pallet[1]=pb2 pallet[0]=pb3
             pallet_vectors = utils.create_vector(extractor, pallet)
@@ -120,8 +127,10 @@ def main():
             im_v_resize=utils.hconcat_resize_min([pallet[2], pallet[1], pallet[0]])
             cv2.putText(im_v_resize, "q=quit", (20,310), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,200,220), 3)
             #im_v_resize=utils.resize_frame(im_v_resize, 0.65)
-            pallet_id, min_dist = utils.find_pallet_from_db(pallet_vectors)
-            print("\nResult: pallet_id " + pallet_id + " min_dist " + str(min_dist) + "\n")              
+            pallet_id, min_dist = utils.find_pallet_from_db(pallet_vectors, file1)
+            print("\nResult: pallet_id " + pallet_id + " min_dist " + str(min_dist) + "\n") 
+            file1.write("\nResult: pallet_id " + pallet_id + " min_dist " + str(min_dist) + "\n")
+            file1.close()             
             cv2.putText(im_v_resize, pallet_id, (20,210), cv2.FONT_HERSHEY_SIMPLEX, 2, (0,200,220), 4)
             while (k!=ord('q')):
                 k=cv2.waitKey(500)
